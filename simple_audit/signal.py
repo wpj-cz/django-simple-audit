@@ -4,6 +4,8 @@ import logging
 import re
 import threading
 from pprint import pprint
+
+from django.utils.six import u
 from . import m2m_audit
 from django.db import models
 from .models import Audit, AuditChange
@@ -92,7 +94,7 @@ def register(*my_models):
                             if sender_m2m.__name__ == "{}_{}".format(model.__name__, m2m[0].name):
                                 models.signals.m2m_changed.connect(audit_m2m_change, sender=sender_m2m)
                                 LOG.debug("Attached signal to: %s" % sender_m2m)
-                        except Exception, e:
+                        except Exception as e:
                             LOG.warning("could not create signal for m2m field: %s" % e)
 
 
@@ -109,7 +111,7 @@ def get_value(obj, attr):
         except:
             value = getattr(obj, attr)
             if hasattr(value, 'all'):
-                return [v.__unicode__() for v in value.all()]
+                return [u(v) for v in value.all()]
             else:
                 return value
     else:
@@ -133,7 +135,7 @@ def to_dict(obj):
 
 def dict_diff(old, new):
 
-    keys = set(old.keys() + new.keys())
+    keys = set(list(old.keys()) + list(new.keys()))
     diff = {}
     for key in keys:
         old_value = old.get(key, None)
@@ -153,9 +155,7 @@ def dict_diff(old, new):
 
 
 def format_value(v):
-    if isinstance(v, basestring):
-        return u"'%s'" % v
-    return unicode(v)
+    return u(v)
 
 
 def save_audit(instance, operation, kwargs={}):
@@ -225,9 +225,9 @@ def save_audit(instance, operation, kwargs={}):
                         format_value(v[1]),
                     ) for k, v in changed_fields.items()])
         elif operation == Audit.DELETE:
-            description = _('Deleted %s') % unicode(instance)
+            description = _('Deleted %s') % u(instance)
         elif operation == Audit.ADD:
-            description = _('Added %s') % unicode(instance)
+            description = _('Added %s') % u(instance)
 
         LOG.debug("called audit with operation=%s instance=%s persist=%s" % (operation, instance, persist_audit))
         if persist_audit:
@@ -259,6 +259,4 @@ def save_audit(instance, operation, kwargs={}):
 
 
 def handle_unicode(s):
-    if isinstance(s, basestring):
-        return s.encode('utf-8')
-    return s
+    u(s)

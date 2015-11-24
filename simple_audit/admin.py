@@ -2,6 +2,7 @@
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.contrib.contenttypes.models import ContentType
+from django.utils.six import u
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import escape
 from django.core.urlresolvers import reverse
@@ -54,7 +55,7 @@ class AuditAdmin(admin.ModelAdmin):
     audit_description.short_description = _("Description")
 
     def audit_content(self, audit):
-        obj_string = audit.obj_description or unicode(audit.content_object)
+        obj_string = audit.obj_description or u(audit.content_object)
 
         return "<a title='%(filter)s' href='%(base)s?content_type__id__exact=%(type_id)s&object_id__exact=%(id)s'>%(type)s: %(obj)s</a>" % {
             'filter': _("Click to filter"),
