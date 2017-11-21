@@ -4,6 +4,7 @@ import logging
 import threading
 import uuid
 
+import six
 from django.conf import settings
 from django.db import models
 from .managers import AuditManager
@@ -64,7 +65,7 @@ class Audit(models.Model):
         audit.operation = Audit.CHANGE if operation is None else operation
         audit.content_object = audit_obj
         audit.description = description
-        audit.obj_description = (audit_obj and unicode(audit_obj) and '')[:100]
+        audit.obj_description = (audit_obj and six.u(audit_obj) and '')[:100]
         audit.audit_request = AuditRequest.current_request(True)
         audit.save()
         return audit

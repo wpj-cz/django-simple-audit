@@ -6,6 +6,8 @@ import re
 import threading
 from pprint import pprint
 
+import six
+
 from . import m2m_audit
 from django import VERSION as DJANGO_VERSION
 from django.db import models
@@ -114,11 +116,11 @@ def get_value(obj, attr):
     """
     if hasattr(obj, attr):
         try:
-            return getattr(obj, attr).__unicode__()
+            return getattr(obj, attr).__str__()
         except:
             value = getattr(obj, attr)
             if hasattr(value, 'all'):
-                return [v.__unicode__() for v in value.all()]
+                return [v.__str__() for v in value.all()]
             else:
                 return value
     else:
@@ -144,7 +146,7 @@ def to_dict(obj):
 
 def dict_diff(old, new):
 
-    keys = set(old.keys() + new.keys())
+    keys = set(list(old.keys()) + list(new.keys()))
     diff = {}
     for key in keys:
         old_value = old.get(key, None)
@@ -164,9 +166,9 @@ def dict_diff(old, new):
 
 
 def format_value(v):
-    if isinstance(v, basestring):
+    if isinstance(v, six.string_types):
         return u"'%s'" % v
-    return unicode(v)
+    return six.u(v)
 
 
 def save_audit(instance, operation, kwargs={}):
@@ -270,6 +272,6 @@ def save_audit(instance, operation, kwargs={}):
 
 
 def handle_unicode(s):
-    if isinstance(s, basestring):
+    if isinstance(s, six.string_types):
         return s.encode('utf-8')
     return s
