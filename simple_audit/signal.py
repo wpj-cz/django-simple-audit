@@ -238,9 +238,9 @@ def save_audit(instance, operation, kwargs={}):
                         format_value(v[1]),
                     ) for k, v in changed_fields.items()])
         elif operation == Audit.DELETE:
-            description = _('Deleted %s') % unicode(instance)
+            description = _('Deleted %s') % six.u(instance)
         elif operation == Audit.ADD:
-            description = _('Added %s') % unicode(instance)
+            description = _('Added %s') % six.u(instance)
 
         LOG.debug("called audit with operation=%s instance=%s persist=%s" % (operation, instance, persist_audit))
         if persist_audit:
